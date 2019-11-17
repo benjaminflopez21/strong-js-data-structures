@@ -1,2 +1,2 @@
 # Strong JS Data Structures
-# Library to have and manages the most common data structures.
+Library that contains the most common data structures an the most useful methods like sort and search.
