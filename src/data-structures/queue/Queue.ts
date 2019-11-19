@@ -4,21 +4,23 @@ import Iterable from '../../ds-util/Iterable';
 import SinglyNode from '../../ds-util/SinglyNode';
 import Node from '../../nodes/Node';
 
-class Stack<T> implements Collection<T>, Iterable<T>, Clonable<Stack<T>>{
+class Queue<T> implements Collection<T>, Iterable<T>, Clonable<Queue<T>>{
 
-    private top:SinglyNode<T>;
+    private first:SinglyNode<T>;
+    private last:SinglyNode<T>;
     private length:number;
 
     constructor(data?:T|T[]){
-        this.top = null;
+        this.first = null;
+        this.last = null;
         this.length = 0;
         if(data && data instanceof Array){
             for(const d of data){
-                this.push(d);
+                this.enqueue(d);
             }
         }
         else if(data){
-            this.push(data as T);
+            this.enqueue(data as T);
         }
     }
 
@@ -26,58 +28,63 @@ class Stack<T> implements Collection<T>, Iterable<T>, Clonable<Stack<T>>{
         if(this.isEmpty()){
             return null;
         }
-        return this.top.getData();
+        return this.first.getData();
     }
 
-    public push(data:T):boolean {
+    public enqueue(data:T):boolean {
         const node:SinglyNode<T> = new Node<T>(data);
-        if(this.top !== null){
-            node.setNext(this.top);
+        if(this.isEmpty()){
+            this.last = node;
+            this.first = node;
         }
-        this.top = node;
+        else{
+            this.last.setNext(node);
+            this.last = node;
+        }
         this.length++;
         return true;
     }
 
-    public pop():T{
+    public dequeue():T{
         if(this.isEmpty()){
             return null;
         }
-        const data:T = this.top.getData();
-        this.top = this.top.getNext();
+        const data = this.first.getData();
+        this.first = this.first.getNext();
+        if(this.first == null){
+            this.last = null;
+        }
         this.length--;
         return data;
     }
 
     // Collection
     public isEmpty(): boolean {
-        return this.top === null;
+        return this.first === null;
     }
-
-
     public clear(): void {
-        this.top = null;
+        this.first = null;
+        this.last = null;
         this.length = 0;
-    }
 
+    }
     public toArray(): T[] {
         const array:T[] = [];
-        let currentNode = this.top;
+        let currentNode = this.first;
         while(currentNode !== null){
             array.push(currentNode.getData());
             currentNode = currentNode.getNext();
         }
-        return array.reverse();
+        return array;
     }
 
     public size():number{
         return this.length;
     }
 
-
     // Interable
-    public forEach(action: (data: T, index?: number) => void): void {
-        let currentNode = this.top;
+    public forEach(action: (data:T, index?: number) => void): void {
+        let currentNode = this.first;
         let currentIndex = 0;
         while(currentNode !== null){
             action(currentNode.getData(), currentIndex);
@@ -86,8 +93,8 @@ class Stack<T> implements Collection<T>, Iterable<T>, Clonable<Stack<T>>{
         }
     }
 
-    public find(filterFn: (data: T) => boolean) {
-        let currentNode = this.top;
+    public find(filterFn: (data:T) => boolean) {
+        let currentNode = this.first;
         while(currentNode !== null){
             if(filterFn(currentNode.getData())){
                 return currentNode.getData();
@@ -97,18 +104,18 @@ class Stack<T> implements Collection<T>, Iterable<T>, Clonable<Stack<T>>{
         return null;
     }
 
-    public map(mapper: (data: T, index:number) => any ): Stack<any> {
+    public map(mapper: (data:T, index:number) => any ): Queue<any> {
         const array:T[] = this.toArray();
         const mappedArray:any[] = new Array(array.length);
         for(let i:number = 0; i<array.length; i++){
             const mappedData = mapper(array[i], i);
             mappedArray.push(mappedData);
         }
-        return new Stack<any>(mappedArray);
+        return new Queue<any>(mappedArray);
     }
 
-    public reduce(reducer: (accumulator: any, data: T) => any, accumulator?:any):any {
-        let currentNode = this.top;
+    public reduce(reducer: (accumulator: any, data:T) => any, accumulator?: any):any {
+        let currentNode = this.first;
         let accumuler:any = accumulator;
         while(currentNode !== null){
             if(accumuler !== null && accumuler !== undefined){
@@ -123,15 +130,15 @@ class Stack<T> implements Collection<T>, Iterable<T>, Clonable<Stack<T>>{
         return accumuler;
     }
 
-    public filter(filterFn: (data:T) => boolean): Stack<T> {
+    public filter(filterFn: (data:T) => boolean): Queue<T> {
         const array:T[] = this.toArray();
-        const filteredArray:T[] = [];
+        const filteredQueue:Queue<T> = new Queue<T>();
         for(const d of array){
             if(filterFn(d)){
-                filteredArray.push(d);
+                filteredQueue.enqueue(d);
             }    
         }
-        return new Stack<T>(filteredArray);
+        return filteredQueue;
     }
 
     public some(evaluator: (data:T) => boolean): boolean {
@@ -142,7 +149,7 @@ class Stack<T> implements Collection<T>, Iterable<T>, Clonable<Stack<T>>{
     }
 
     public every(evaluator: (data:T) => boolean): boolean {
-        let currentNode = this.top;
+        let currentNode = this.first;
         while(currentNode !== null){
             if(!evaluator(currentNode.getData())){
                 return false;
@@ -153,10 +160,9 @@ class Stack<T> implements Collection<T>, Iterable<T>, Clonable<Stack<T>>{
     }
 
     // Clonable
-    public clone(): Stack<T> {
+    public clone(): Queue<T> {
         return this.filter(data => true);
     }
-
 }
 
-export default Stack;
+export default Queue;
