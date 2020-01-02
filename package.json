@@ -15,7 +15,10 @@
         "version": "npm run format && git add -A src",
         "postversion": "git push && git push --tags"
     },
-    "keywords": ["Data", "Structures"],
+    "keywords": [
+        "Data",
+        "Structures"
+    ],
     "author": "Benjamin Franklin Lopez Borquez",
     "license": "MIT",
     "devDependencies": {
